@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Book, Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
@@ -10,6 +10,17 @@ export class BooksService {
     return this.databaseService.book.create({
       data: createBookDto,
     });
+  }
+
+  async createMultiple(
+    createBookDtos: Prisma.BookCreateInput[],
+  ): Promise<Book[]> {
+    const books = await Promise.all(
+      createBookDtos.map((dto) =>
+        this.databaseService.book.create({ data: dto }),
+      ),
+    );
+    return books;
   }
 
   async findAll() {

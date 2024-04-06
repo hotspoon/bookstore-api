@@ -18,6 +18,10 @@ export class BooksController {
   create(@Body() createBookDto: Prisma.BookCreateInput) {
     return this.booksService.create(createBookDto);
   }
+  @Post('/multiple')
+  createMultiple(@Body() createBookDtos: Prisma.BookCreateInput[]) {
+    return this.booksService.createMultiple(createBookDtos);
+  }
 
   @Get()
   findAll() {
