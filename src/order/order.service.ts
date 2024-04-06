@@ -3,14 +3,38 @@ import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 import { NotFoundException } from '@nestjs/common';
 
+export type OrderCreateInput = {
+  customerId: number;
+  bookId: number;
+};
+
 @Injectable()
 export class OrderService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  create(createOrderDto: Prisma.OrderCreateInput) {
-    return this.databaseService.order.create({
+  async create(createOrderDto: OrderCreateInput) {
+    const existingOrder = await this.databaseService.order.findFirst({
+      where: {
+        customerId: createOrderDto.customerId,
+        bookId: createOrderDto.bookId,
+      },
+    });
+
+    if (existingOrder) {
+      throw new Error(
+        JSON.stringify({
+          error: 'OrderExists',
+          message:
+            'An active order for this book already exists for this customer.',
+        }),
+      );
+    }
+
+    await this.databaseService.order.create({
       data: createOrderDto,
     });
+
+    return { message: 'Order created successfully.' };
   }
 
   findAll() {
@@ -28,7 +52,9 @@ export class OrderService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} order`;
+    return this.databaseService.order.delete({
+      where: { id },
+    });
   }
 
   async cancel(id: number) {

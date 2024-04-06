@@ -6,8 +6,10 @@ import {
   Patch,
   Param,
   Delete,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { OrderService } from './order.service';
+import { OrderCreateInput, OrderService } from './order.service';
 import { Prisma } from '@prisma/client';
 
 @Controller('order')
@@ -15,8 +17,17 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  create(@Body() createOrderDto: Prisma.OrderCreateInput) {
-    return this.orderService.create(createOrderDto);
+  async create(@Body() createOrderDto: OrderCreateInput) {
+    try {
+      return await this.orderService.create(createOrderDto);
+    } catch (error) {
+      const { message } = error;
+      const { error: errorCode, message: errorMessage } = JSON.parse(message);
+      throw new HttpException(
+        { errorCode, errorMessage },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Get()
