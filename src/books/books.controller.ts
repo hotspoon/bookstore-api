@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { Prisma } from '@prisma/client';
@@ -24,8 +25,8 @@ export class BooksController {
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  findAll(@Query('page') page: string, @Query('limit') limit: string) {
+    return this.booksService.findAll({ page, limit });
   }
 
   @Get(':id')

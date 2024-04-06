@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Book, Prisma, Tag } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
 
+interface PaginateQuery {
+  page: string;
+  limit: string;
+}
+
 @Injectable()
 export class BooksService {
   constructor(private readonly databaseService: DatabaseService) {}
@@ -54,17 +59,30 @@ export class BooksService {
     return books;
   }
 
-  async findAll() {
+  async findAll(query: PaginateQuery) {
+    const page = parseInt(query.page, 10);
+    const limit = parseInt(query.limit, 10);
+
+    const totalItems = await this.databaseService.book.count();
     const books = await this.databaseService.book.findMany({
+      skip: page * limit,
+      take: limit,
       include: {
         tags: true,
       },
     });
 
-    return books.map((book) => ({
+    const items = books.map((book) => ({
       ...book,
       tags: book.tags.map((tag) => tag.name),
     }));
+
+    return {
+      items,
+      totalItems,
+      currentPage: page,
+      totalPages: Math.ceil(totalItems / limit),
+    };
   }
 
   async findOne(id: number) {
