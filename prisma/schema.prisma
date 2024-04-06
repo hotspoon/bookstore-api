@@ -22,13 +22,21 @@ model Customer {
 }
 
 model Book {
-  id        Int      @id @default(autoincrement())
-  title     String
-  author    String
-  price     Int
-  stock     Int
-  createdAt DateTime @default(now())
-  orders    Order[]
+  id         Int      @id @default(autoincrement())
+  title      String
+  writer     String
+  coverImage String
+  price      Int
+  stock      Int
+  createdAt  DateTime @default(now())
+  orders     Order[]
+  tags       Tag[]
+}
+
+model Tag {
+  id        Int    @id @default(autoincrement())
+  name      String @unique
+  books     Book[]
 }
 
 model Order {

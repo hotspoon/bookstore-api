@@ -1,10 +1,21 @@
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api');
+  const globalPrefix = 'api';
+  app.setGlobalPrefix(globalPrefix);
+
+  const config = new DocumentBuilder()
+    .setTitle('Bookstore API')
+    .setDescription('The Bookstore API description')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api-docs', app, document);
+
   app.enableCors({
     origin: ['https://bookstore-api-ecru.vercel.app', 'http://localhost:3000'],
     methods: 'GET, HEAD, PUT, POST, DELETE, OPTIONS, PATCH',
