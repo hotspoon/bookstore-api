@@ -65,7 +65,7 @@ export class BooksService {
 
     const totalItems = await this.databaseService.book.count();
     const books = await this.databaseService.book.findMany({
-      skip: page * limit,
+      skip: (page - 1) * limit,
       take: limit,
       include: {
         tags: true,
