@@ -55,7 +55,16 @@ export class BooksService {
   }
 
   async findAll() {
-    return this.databaseService.book.findMany();
+    const books = await this.databaseService.book.findMany({
+      include: {
+        tags: true,
+      },
+    });
+
+    return books.map((book) => ({
+      ...book,
+      tags: book.tags.map((tag) => tag.name),
+    }));
   }
 
   async findOne(id: number) {
