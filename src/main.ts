@@ -17,7 +17,11 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.enableCors({
-    origin: ['https://bookstore-api-ecru.vercel.app', 'http://localhost:3000'],
+    origin: [
+      'https://bookstore-api-ecru.vercel.app',
+      'http://localhost:3000',
+      'https://bookstore-next-app.vercel.app',
+    ],
     methods: 'GET, HEAD, PUT, POST, DELETE, OPTIONS, PATCH',
     credentials: true,
     allowedHeaders:
