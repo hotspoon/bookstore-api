@@ -11,8 +11,10 @@ interface PaginateQuery {
 export class BooksService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createBookDto: Prisma.BookCreateInput): Promise<Book> {
-    const { tags, ...bookData } = createBookDto;
+  async create(
+    createBookDto: Prisma.BookCreateInput & { customerId: number },
+  ): Promise<Book> {
+    const { tags, customerId, ...bookData } = createBookDto;
 
     let resolvedTags = [];
 
@@ -38,7 +40,7 @@ export class BooksService {
       resolvedTags = await Promise.all(tagPromises);
     }
 
-    return this.databaseService.book.create({
+    const book = await this.databaseService.book.create({
       data: {
         ...bookData,
         tags: {
@@ -46,6 +48,15 @@ export class BooksService {
         },
       },
     });
+
+    await this.databaseService.order.create({
+      data: {
+        customerId,
+        bookId: book.id,
+      },
+    });
+
+    return book;
   }
 
   async createMultiple(

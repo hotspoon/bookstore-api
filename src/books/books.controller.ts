@@ -16,8 +16,11 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  create(@Body() createBookDto: Prisma.BookCreateInput) {
-    return this.booksService.create(createBookDto);
+  async create(
+    @Body() createBookDto: Prisma.BookCreateInput,
+    @Query('customerId') customerId: number,
+  ) {
+    return this.booksService.create({ ...createBookDto, customerId });
   }
   @Post('/multiple')
   createMultiple(@Body() createBookDtos: Prisma.BookCreateInput[]) {

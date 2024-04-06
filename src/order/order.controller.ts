@@ -22,7 +22,17 @@ export class OrderController {
       return await this.orderService.create(createOrderDto);
     } catch (error) {
       const { message } = error;
-      const { error: errorCode, message: errorMessage } = JSON.parse(message);
+      let errorCode, errorMessage;
+
+      try {
+        const parsedMessage = JSON.parse(message);
+        errorCode = parsedMessage.error;
+        errorMessage = parsedMessage.message;
+      } catch (parseError) {
+        errorCode = 'ServerError';
+        errorMessage = message;
+      }
+
       throw new HttpException(
         { errorCode, errorMessage },
         HttpStatus.BAD_REQUEST,
@@ -46,6 +56,11 @@ export class OrderController {
     @Body() updateOrderDto: Prisma.OrderUpdateInput,
   ) {
     return this.orderService.update(+id, updateOrderDto);
+  }
+
+  @Patch(':id/update')
+  updateOrder(@Param('id') id: string) {
+    return this.orderService.updateOrder(+id);
   }
 
   @Patch(':id/cancel')

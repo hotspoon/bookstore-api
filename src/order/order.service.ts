@@ -13,6 +13,28 @@ export class OrderService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createOrderDto: OrderCreateInput) {
+    if (!createOrderDto.customerId || !createOrderDto.bookId) {
+      throw new Error(
+        JSON.stringify({
+          error: 'MissingData',
+          message: 'Both customerId and bookId must be provided.',
+        }),
+      );
+    }
+
+    const book = await this.databaseService.book.findUnique({
+      where: { id: createOrderDto.bookId },
+    });
+
+    if (!book) {
+      throw new Error(
+        JSON.stringify({
+          error: 'BookNotFound',
+          message: 'No book found with the provided bookId.',
+        }),
+      );
+    }
+
     const existingOrder = await this.databaseService.order.findFirst({
       where: {
         customerId: createOrderDto.customerId,
@@ -54,6 +76,21 @@ export class OrderService {
   remove(id: number) {
     return this.databaseService.order.delete({
       where: { id },
+    });
+  }
+
+  async updateOrder(id: number) {
+    const order = await this.databaseService.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    return this.databaseService.order.update({
+      where: { id },
+      data: { cancelled: false },
     });
   }
 
