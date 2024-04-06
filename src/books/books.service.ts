@@ -69,12 +69,19 @@ export class BooksService {
       take: limit,
       include: {
         tags: true,
+        orders: true, // Fetch related orders
       },
     });
 
     const items = books.map((book) => ({
       ...book,
       tags: book.tags.map((tag) => tag.name),
+      orders: book.orders.map((order) => ({
+        id: order.id,
+        customerId: order.customerId,
+        createdAt: order.createdAt,
+        cancelled: order.cancelled,
+      })),
     }));
 
     return {

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../database/database.service';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class OrderService {
@@ -30,7 +31,15 @@ export class OrderService {
     return `This action removes a #${id} order`;
   }
 
-  cancel(id: number) {
+  async cancel(id: number) {
+    const order = await this.databaseService.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
     return this.databaseService.order.update({
       where: { id },
       data: { cancelled: true },
