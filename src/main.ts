@@ -1,9 +1,10 @@
+// main.ts
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { resolve } from 'path';
 import { writeFileSync, existsSync } from 'fs';
-import { ServeStaticModule } from '@nestjs/serve-static';
+import { static as expressStatic } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,12 +36,7 @@ async function bootstrap() {
     // serve static files in production
     const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
     if (existsSync(pathToSwaggerStaticFolder)) {
-      app.use(
-        '/api-docs',
-        ServeStaticModule.forRoot({
-          rootPath: pathToSwaggerStaticFolder,
-        }),
-      );
+      app.use('/swagger', expressStatic(pathToSwaggerStaticFolder));
     }
   }
 
