@@ -4,8 +4,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { resolve } from 'path';
 import { writeFileSync, existsSync, readFileSync } from 'fs';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +14,9 @@ async function bootstrap() {
   const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
   const pathToSwaggerJson = resolve(pathToSwaggerStaticFolder, 'swagger.json');
 
+  const swaggerPath = '/swagger-ui';
+  const swaggerCDN = 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.7.2';
+
   if (process.env.NODE_ENV === 'development') {
     const config = new DocumentBuilder()
       .setTitle('Bookstore API')
@@ -23,6 +24,13 @@ async function bootstrap() {
       .setVersion('1.0')
       .build();
     const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(swaggerPath, app, document, {
+      customCssUrl: swaggerCDN + '/swagger-ui.css',
+      customJs: [
+        swaggerCDN + '/swagger-ui-bundle.js',
+        swaggerCDN + '/swagger-ui-standalone-preset.js',
+      ],
+    });
 
     // write swagger json file
     const swaggerJson = JSON.stringify(document, null, 2);
@@ -32,18 +40,15 @@ async function bootstrap() {
     // serve static files in production
     if (existsSync(pathToSwaggerJson)) {
       const document = JSON.parse(readFileSync(pathToSwaggerJson, 'utf8'));
-      SwaggerModule.setup('swagger-ui', app, document);
+      SwaggerModule.setup(swaggerPath, app, document, {
+        customCssUrl: swaggerCDN + '/swagger-ui.css',
+        customJs: [
+          swaggerCDN + '/swagger-ui-bundle.js',
+          swaggerCDN + '/swagger-ui-standalone-preset.js',
+        ],
+      });
     }
   }
-
-  // serve swagger UI as a static file
-  const swaggerUiPath = join(__dirname, '..', 'swagger.html');
-  app.use(
-    '/swagger-ui',
-    ServeStaticModule.forRoot({
-      rootPath: swaggerUiPath,
-    }),
-  );
 
   app.enableCors({
     origin: '*',
