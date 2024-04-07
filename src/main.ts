@@ -14,7 +14,7 @@ async function bootstrap() {
   const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
   const pathToSwaggerJson = resolve(pathToSwaggerStaticFolder, 'swagger.json');
 
-  const swaggerPath = '/swagger-ui';
+  const swaggerPath = '/api-docs';
   const swaggerCDN = 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.7.2';
 
   if (process.env.NODE_ENV === 'development') {
