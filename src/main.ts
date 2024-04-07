@@ -4,8 +4,9 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { resolve } from 'path';
 import { writeFileSync, existsSync, readFileSync } from 'fs';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import * as express from 'express';
+
+const swaggerUiAssetPath = require('swagger-ui-dist').getAbsoluteFSPath();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,8 @@ async function bootstrap() {
   const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
   const pathToSwaggerJson = resolve(pathToSwaggerStaticFolder, 'swagger.json');
 
+  const swaggerPath = '/swagger-ui';
+
   if (process.env.NODE_ENV === 'development') {
     const config = new DocumentBuilder()
       .setTitle('Bookstore API')
@@ -23,6 +26,7 @@ async function bootstrap() {
       .setVersion('1.0')
       .build();
     const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(swaggerPath, app, document);
 
     // write swagger json file
     const swaggerJson = JSON.stringify(document, null, 2);
@@ -32,23 +36,12 @@ async function bootstrap() {
     // serve static files in production
     if (existsSync(pathToSwaggerJson)) {
       const document = JSON.parse(readFileSync(pathToSwaggerJson, 'utf8'));
-      SwaggerModule.setup('swagger-ui', app, document);
+      SwaggerModule.setup(swaggerPath, app, document);
     }
   }
 
   // serve swagger UI as a static file
-  const swaggerUiPath = join(
-    __dirname,
-    '..',
-    'node_modules',
-    'swagger-ui-dist',
-  );
-  app.use(
-    '/swagger-ui',
-    ServeStaticModule.forRoot({
-      rootPath: swaggerUiPath,
-    }),
-  );
+  app.use('/swagger-ui', express.static(swaggerUiAssetPath));
 
   app.enableCors({
     origin: '*',
