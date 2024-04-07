@@ -33,11 +33,13 @@
     "@prisma/client": "^5.12.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.7",
+    "express": "^4.19.2",
     "mysql2": "^3.9.3",
     "nestjs-paginate": "^8.6.2",
     "pg": "^8.11.5",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "swagger-ui-dist": "^5.13.0",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
