@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { resolve } from 'path';
-import { writeFileSync, existsSync } from 'fs';
+import { writeFileSync, existsSync, readFileSync } from 'fs';
 import { static as expressStatic } from 'express';
 
 async function bootstrap() {
@@ -11,6 +11,9 @@ async function bootstrap() {
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+
+  const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
+  const pathToSwaggerJson = resolve(pathToSwaggerStaticFolder, 'swagger.json');
 
   if (process.env.NODE_ENV === 'development') {
     const config = new DocumentBuilder()
@@ -21,22 +24,15 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api-docs', app, document);
 
-    // get the swagger json file
-    const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
-
     // write swagger json file
-    const pathToSwaggerJson = resolve(
-      pathToSwaggerStaticFolder,
-      'swagger.json',
-    );
     const swaggerJson = JSON.stringify(document, null, 2);
     writeFileSync(pathToSwaggerJson, swaggerJson);
     console.log(`Swagger JSON file written to: '/swagger-static/swagger.json'`);
   } else if (process.env.NODE_ENV === 'production') {
     // serve static files in production
-    const pathToSwaggerStaticFolder = resolve(process.cwd(), 'swagger-static');
-    if (existsSync(pathToSwaggerStaticFolder)) {
-      app.use('/swagger', expressStatic(pathToSwaggerStaticFolder));
+    if (existsSync(pathToSwaggerJson)) {
+      const document = JSON.parse(readFileSync(pathToSwaggerJson, 'utf8'));
+      SwaggerModule.setup('api-docs', app, document);
     }
   }
 
