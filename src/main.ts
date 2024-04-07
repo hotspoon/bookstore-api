@@ -41,7 +41,7 @@ async function bootstrap() {
     if (existsSync(pathToSwaggerJson)) {
       const document = JSON.parse(readFileSync(pathToSwaggerJson, 'utf8'));
       SwaggerModule.setup(swaggerPath, app, document, {
-        customCss: swaggerCDN + '/swagger-ui.css',
+        customCssUrl: swaggerCDN + '/swagger-ui.css',
         customJs: [
           swaggerCDN + '/swagger-ui-bundle.js',
           swaggerCDN + '/swagger-ui-standalone-preset.js',
