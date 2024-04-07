@@ -5,14 +5,22 @@ import { AppModule } from './app.module';
 import { resolve } from 'path';
 import { writeFileSync, existsSync, readFileSync } from 'fs';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import { Module } from '@nestjs/common';
 
 const swaggerUiAssetPath = require('swagger-ui-dist').getAbsoluteFSPath();
 
+@Module({
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: swaggerUiAssetPath,
+      serveRoot: '/swagger-ui',
+    }),
+  ],
+})
+class SwaggerStaticModule {}
+
 async function bootstrap() {
-  const server = express();
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  const app = await NestFactory.create(AppModule);
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
@@ -42,9 +50,6 @@ async function bootstrap() {
       SwaggerModule.setup(swaggerPath, app, document);
     }
   }
-
-  // serve swagger UI as a static file
-  server.use(swaggerPath, express.static(swaggerUiAssetPath));
 
   app.enableCors({
     origin: '*',
